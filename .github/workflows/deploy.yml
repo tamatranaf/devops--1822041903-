@@ -15,7 +15,7 @@ permissions:
 jobs:
   # ===== JOB 1: CHECK (đây là phần CI) =====
   check:
-    runs-on: ubuntu-latest
+    runs-on: runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
   # ===== JOB 2: DEPLOY (đây là phần CD) =====
   deploy:
     needs: check # chỉ chạy khi job check thành công
-    runs-on: ubuntu-latest
+    runs-on: runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
