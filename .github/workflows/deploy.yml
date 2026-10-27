@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+# Kích hoạt quy trình mỗi khi có code được push lên nhánh main
+on:
+  push:
+    branches:
+      - main
+
+# Cấp quyền cần thiết để có thể deploy lên GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # ===== JOB 1: CHECK (đây là phần CI) =====
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Kiem tra 3 file ton tai
+        run: |
+          if [ ! -f index.html ] || [ ! -f style.css ] || [ ! -f script.js ]; then
+            echo "❌ Loi: Thieu 1 trong 3 file (index.html, style.css, script.js)!"
+            exit 1
+          fi
+          echo "✅ Da co du 3 file."
+
+      - name: Kiem tra the title trong index.html
+        run: |
+          if ! grep -q "<title>" index.html; then
+            echo "❌ Loi: Khong tim thay the <title>!"
+            exit 1
+          fi
+          echo "✅ Co the title"
+
+  # ===== JOB 2: DEPLOY (đây là phần CD) =====
+  deploy:
+    needs: check # chỉ chạy khi job check thành công
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
